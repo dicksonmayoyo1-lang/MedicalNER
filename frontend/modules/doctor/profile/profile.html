@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" class="dashboard-page doctor-dashboard">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Medical RAG</title>
+    <link rel="stylesheet" href="/frontend/base.css">
+    <link rel="stylesheet" href="/frontend/modules/doctor/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="dashboard-page doctor-dashboard">
+    <!-- Navigation will be loaded here -->
+    <div id="navigation"></div>
+
+    <!-- Doctor-specific navigation -->
+    <nav class="doctor-nav">
+        <a href="/frontend/modules/doctor/dashboard.html" class="nav-link">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+        <a href="/frontend/modules/doctor/patients/manage.html" class="nav-link">
+            <i class="fas fa-users"></i> Patients
+        </a>
+        <a href="/frontend/modules/doctor/appointments/manage.html" class="nav-link">
+            <i class="fas fa-calendar-check"></i> Appointments
+        </a>
+        <a href="/frontend/modules/doctor/screening/screening.html" class="nav-link">
+            <i class="fas fa-search-medical"></i> Screening
+        </a>
+        <a href="/frontend/modules/doctor/analytics/analytics.html" class="nav-link">
+            <i class="fas fa-file-medical"></i> Records
+        </a>
+        <div class="nav-spacer"></div>
+        <div class="user-menu">
+            <button class="user-btn" id="user-menu-btn">
+                <i class="fas fa-user-md"></i>
+                <span id="user-name">Loading...</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="user-dropdown hidden" id="user-dropdown">
+                <a href="/frontend/modules/doctor/profile/profile.html"><i class="fas fa-user"></i> Profile</a>
+                <a href="/frontend/modules/doctor/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-user-md"></i> My Profile</h1>
+            <p>Manage your professional information</p>
+        </div>
+
+        <div class="content-card">
+            <div class="card-header">
+                <h3 class="card-title">Professional Information</h3>
+                <button class="btn btn-primary" id="edit-profile-btn">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="profile-loading" class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Loading profile...
+                </div>
+                <div id="profile-content" class="hidden">
+                    <div class="profile-section">
+                        <div class="profile-field">
+                            <label>Full Name</label>
+                            <div class="field-value" id="full-name">-</div>
+                        </div>
+                        <div class="profile-field">
+                            <label>Username</label>
+                            <div class="field-value" id="username">-</div>
+                        </div>
+                        <div class="profile-field">
+                            <label>Email</label>
+                            <div class="field-value" id="email">-</div>
+                        </div>
+                        <div class="profile-field">
+                            <label>Role</label>
+                            <div class="field-value">
+                                <span class="badge badge-success" id="role">-</span>
+                            </div>
+                        </div>
+                        <div class="profile-field">
+                            <label>Account Created</label>
+                            <div class="field-value" id="created-at">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Profile Modal -->
+        <div id="edit-profile-modal" class="modal hidden">
+            <div class="modal-backdrop" onclick="closeEditModal()"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Edit Profile</h3>
+                    <button class="modal-close" onclick="closeEditModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-profile-form">
+                        <div class="form-group">
+                            <label for="edit-full-name">Full Name</label>
+                            <input type="text" id="edit-full-name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-email">Email</label>
+                            <input type="email" id="edit-email" class="form-control" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/frontend/shared/api.js"></script>
+    <script src="/frontend/shared/utils.js"></script>
+    <script src="/frontend/auth/auth.js"></script>
+    <script>
+        // Check auth on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const auth = AuthApp.checkAuth();
+            if (!auth || auth.user.role !== 'doctor') {
+                window.location.href = '/frontend/auth/login.html';
+                return;
+            }
+
+            // Load profile data
+            loadProfile();
+
+            // Update user name in nav
+            document.getElementById('user-name').textContent = auth.user.full_name || auth.user.username;
+
+            // Bind events
+            document.getElementById('edit-profile-btn')?.addEventListener('click', () => {
+                openEditModal();
+            });
+
+            document.getElementById('edit-profile-form')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                saveProfile();
+            });
+
+            document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                AuthApp.logout();
+            });
+
+            // User menu toggle
+            document.getElementById('user-menu-btn')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('user-dropdown').classList.toggle('hidden');
+            });
+        });
+
+        async function loadProfile() {
+            try {
+                const response = await window.medicalAPI.get('/auth/me');
+                const user = response;
+
+                document.getElementById('full-name').textContent = user.full_name || 'Not set';
+                document.getElementById('username').textContent = user.username;
+                document.getElementById('email').textContent = user.email;
+                document.getElementById('role').textContent = user.role.toUpperCase();
+                document.getElementById('created-at').textContent = new Date(user.created_at).toLocaleDateString();
+
+                document.getElementById('profile-loading').classList.add('hidden');
+                document.getElementById('profile-content').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                document.getElementById('profile-loading').innerHTML =
+                    '<div class="error"><i class="fas fa-exclamation-triangle"></i> Error loading profile</div>';
+            }
+        }
+
+        function openEditModal() {
+            const user = window.medicalAPI.getCurrentUser();
+            document.getElementById('edit-full-name').value = user.full_name || '';
+            document.getElementById('edit-email').value = user.email || '';
+            document.getElementById('edit-profile-modal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-profile-modal').classList.add('hidden');
+        }
+
+        async function saveProfile() {
+            const fullName = document.getElementById('edit-full-name').value;
+            const email = document.getElementById('edit-email').value;
+
+            try {
+                // Note: Backend doesn't have update endpoint yet, so this is a placeholder
+                alert('Profile update feature coming soon!');
+                closeEditModal();
+            } catch (error) {
+                console.error('Error saving profile:', error);
+                alert('Error saving profile. Please try again.');
+            }
+        }
+    </script>
+          <script src="/frontend/modules/doctor/dashboard.js"></script>
+
+</body>
+
+</html>

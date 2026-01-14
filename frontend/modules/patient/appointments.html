@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" class="dashboard-page patient-dashboard">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Appointments - Medical RAG</title>
+    <link rel="stylesheet" href="/frontend/base.css">
+    <link rel="stylesheet" href="/frontend/modules/patient/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="dashboard-page patient-dashboard">
+    <!-- Navigation will be loaded here -->
+    <div id="navigation"></div>
+
+    <!-- Patient-specific navigation -->
+    <nav class="patient-nav">
+        <a href="/frontend/modules/patient/dashboard.html" class="nav-link">
+            <i class="fas fa-home"></i> Overview
+        </a>
+        <a href="/frontend/modules/patient/records/view.html" class="nav-link">
+            <i class="fas fa-file-medical"></i> My Records
+        </a>
+        <a href="/frontend/modules/patient/appointments.html" class="nav-link active">
+            <i class="fas fa-calendar-alt"></i> Appointments
+        </a>
+        <a href="/frontend/modules/patient/medications.html" class="nav-link">
+            <i class="fas fa-pills"></i> Medications
+        </a>
+        <div class="nav-spacer"></div>
+        <div class="user-menu">
+            <button class="user-btn" id="user-menu-btn">
+                <i class="fas fa-user"></i>
+                <span id="user-name">Loading...</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="user-dropdown hidden" id="user-dropdown">
+                <a href="/frontend/modules/patient/profile/profile.html"><i class="fas fa-user"></i> Profile</a>
+                <a href="/frontend/modules/patient/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-calendar-alt"></i> My Appointments</h1>
+            <p>View and manage your appointments</p>
+        </div>
+
+        <div class="content-card">
+            <div class="card-header">
+                <h3 class="card-title">Upcoming Appointments</h3>
+                <a href="/frontend/modules/patient/request-appointment.html" class="btn btn-primary">
+                    <i class="fas fa-calendar-plus"></i> Request Appointment
+                </a>
+            </div>
+            <div class="card-body">
+                <div id="appointments-loading" class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Loading appointments...
+                </div>
+                <div id="appointments-content" class="hidden">
+                    <div id="appointments-list"></div>
+                </div>
+                <div id="appointments-empty" class="hidden">
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-times"></i>
+                        <h3>No Appointments</h3>
+                        <p>You don't have any upcoming appointments.</p>
+                        <a href="/frontend/modules/patient/request-appointment.html" class="btn btn-primary">
+                            <i class="fas fa-calendar-plus"></i> Request Appointment
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/frontend/shared/api.js"></script>
+    <script src="/frontend/shared/utils.js"></script>
+    <script src="/frontend/auth/auth.js"></script>
+    <script>
+        // Check auth on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const auth = AuthApp.checkAuth();
+            if (!auth || auth.user.role !== 'patient') {
+                window.location.href = '/frontend/auth/login.html';
+                return;
+            }
+
+            // Update user name in nav
+            document.getElementById('user-name').textContent = auth.user.full_name || auth.user.username;
+
+            // Load appointments
+            loadAppointments();
+
+            // Bind events
+            document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                AuthApp.logout();
+            });
+
+            // User menu toggle
+            document.getElementById('user-menu-btn')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('user-dropdown').classList.toggle('hidden');
+            });
+        });
+
+        async function loadAppointments() {
+            try {
+                const appointments = await window.medicalAPI.get('/appointments');
+
+                document.getElementById('appointments-loading').classList.add('hidden');
+
+                if (!appointments || appointments.length === 0) {
+                    document.getElementById('appointments-empty').classList.remove('hidden');
+                    return;
+                }
+
+                document.getElementById('appointments-content').classList.remove('hidden');
+                const list = document.getElementById('appointments-list');
+                
+                // Sort appointments: pending/confirmed first, then by date
+                const sortedAppointments = appointments.sort((a, b) => {
+                    const statusOrder = { 'pending': 1, 'confirmed': 2, 'completed': 3, 'cancelled': 4 };
+                    const statusDiff = (statusOrder[a.status] || 5) - (statusOrder[b.status] || 5);
+                    if (statusDiff !== 0) return statusDiff;
+                    const dateA = a.scheduled_date || a.preferred_date || '';
+                    const dateB = b.scheduled_date || b.preferred_date || '';
+                    return dateA.localeCompare(dateB);
+                });
+                
+                list.innerHTML = sortedAppointments.map(apt => {
+                    const statusBadge = getStatusBadge(apt.status);
+                    const displayDate = apt.scheduled_date || apt.preferred_date;
+                    const displayTime = apt.scheduled_time || apt.preferred_time;
+                    const dateStr = displayDate ? new Date(displayDate).toLocaleDateString() : 'TBD';
+                    const timeStr = displayTime || 'TBD';
+                    
+                    return `
+                    <div class="appointment-item" style="padding: 15px; border-bottom: 1px solid #dee2e6; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0 0 8px 0; text-transform: capitalize;">${apt.type || 'Appointment'}</h4>
+                                <p style="margin: 4px 0;"><i class="fas fa-calendar"></i> <strong>Date:</strong> ${dateStr}</p>
+                                <p style="margin: 4px 0;"><i class="fas fa-clock"></i> <strong>Time:</strong> ${timeStr}</p>
+                                ${apt.scheduled_date ? `<p style="margin: 4px 0;"><i class="fas fa-user-md"></i> <strong>Doctor:</strong> ${apt.doctor_id ? 'Assigned' : 'TBD'}</p>` : ''}
+                                <p style="margin: 8px 0 0 0; color: #6c757d; font-size: 0.9em;"><strong>Reason:</strong> ${window.Utils.escapeHtml(apt.reason || 'No reason provided')}</p>
+                                ${apt.doctor_notes ? `<p style="margin: 8px 0 0 0; color: #495057; font-size: 0.9em; font-style: italic;"><strong>Doctor Notes:</strong> ${window.Utils.escapeHtml(apt.doctor_notes)}</p>` : ''}
+                            </div>
+                            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                                ${statusBadge}
+                                ${apt.status === 'pending' ? `<button class="btn btn-sm btn-danger" onclick="cancelAppointment('${apt.id}')">Cancel</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+                document.getElementById('appointments-loading').innerHTML = 
+                    '<div class="error"><i class="fas fa-exclamation-triangle"></i> Error loading appointments</div>';
+            }
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'pending': '<span class="badge badge-warning">Pending</span>',
+                'confirmed': '<span class="badge badge-success">Confirmed</span>',
+                'cancelled': '<span class="badge badge-danger">Cancelled</span>',
+                'completed': '<span class="badge badge-info">Completed</span>'
+            };
+            return badges[status] || '<span class="badge">Unknown</span>';
+        }
+
+        async function cancelAppointment(appointmentId) {
+            if (!confirm('Are you sure you want to cancel this appointment?')) {
+                return;
+            }
+            
+            try {
+                await window.medicalAPI.put(`/appointments/${appointmentId}`, {
+                    status: 'cancelled'
+                });
+                alert('Appointment cancelled successfully');
+                loadAppointments();
+            } catch (error) {
+                console.error('Error cancelling appointment:', error);
+                alert('Error cancelling appointment. Please try again.');
+            }
+        }
+
+        function viewAppointmentDetails(appointmentId) {
+            // Could open a modal or navigate to detail page
+            alert('Appointment details feature coming soon!');
+        }
+    </script>
+</body>
+
+</html>
+

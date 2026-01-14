@@ -1,0 +1,165 @@
+/* Shared Base Styles */
+:root {
+  --bg: #f6f8fa;
+  --card: #fff;
+  --accent: #007bff;
+  --muted: #6b7280;
+  --disease: #ffeb3b;
+  --lab: #90caf9;
+  --border: #e6e9ee;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  margin: 5;
+  background: var(--bg);
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Navigation Styles */
+.app-nav {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-brand h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.nav-links {
+  display: flex;
+  gap: 10px;
+}
+
+.nav-link {
+  padding: 10px 16px;
+  text-decoration: none;
+  color: var(--muted);
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-link:hover {
+  background: #f3f7ff;
+  color: var(--accent);
+}
+
+.nav-link.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* Main container */
+.main-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Shared components */
+.btn {
+  padding: 8px 12px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.btn:hover {
+  filter: brightness(0.95);
+}
+
+.btn-small {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+/* Modal styles (shared) */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal[aria-hidden="false"] {
+  display: flex;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.modal-content {
+  position: relative;
+  background: #fff;
+  border-radius: 8px;
+  max-width: 900px;
+  width: 92%;
+  max-height: 80vh;
+  overflow: auto;
+  z-index: 10;
+  padding: 12px;
+  border: 1px solid var(--border);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.modal-body {
+  white-space: pre-wrap;
+  font-family: monospace;
+  font-size: 13px;
+  padding: 6px;
+  background: #fbfcfe;
+  border-radius: 6px;
+  border: 1px dashed var(--border);
+  max-height: 60vh;
+  overflow: auto;
+}
+
+.modal-close {
+  background: transparent;
+  border: 0;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.modal-close:hover {
+  color: #111827;
+}

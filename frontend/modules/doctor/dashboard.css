@@ -1,0 +1,403 @@
+/* Doctor Dashboard Specific Styles */
+.doctor-dashboard {
+  background: #f5f7fa;
+}
+
+/* Doctor Navigation */
+.doctor-nav {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 30px;
+  background: white;
+  border-bottom: 1px solid #dee2e6;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.doctor-nav .nav-link {
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #495057;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.doctor-nav .nav-link:hover {
+  background: #e9ecef;
+  color: #007bff;
+}
+
+.doctor-nav .nav-link.active {
+  background: #007bff;
+  color: white;
+}
+
+/* User Menu */
+.user-menu {
+  position: relative;
+}
+
+.user-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #495057;
+}
+
+.user-btn:hover {
+  background: #e9ecef;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 200px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-top: 5px;
+  z-index: 1000;
+}
+
+.user-dropdown a {
+  display: block;
+  padding: 10px 15px;
+  text-decoration: none;
+  color: #495057;
+  transition: background 0.2s;
+}
+
+.user-dropdown a:hover {
+  background: #f8f9fa;
+  color: #007bff;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #dee2e6;
+  margin: 5px 0;
+}
+
+/* Welcome Banner */
+.welcome-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 30px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+
+.welcome-text h1 {
+  margin: 0 0 10px 0;
+  font-size: 2.2rem;
+}
+
+.welcome-text p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 1.1rem;
+}
+
+.welcome-actions {
+  display: flex;
+  gap: 15px;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9ecef;
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  color: #718096;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Content Grid */
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.content-card {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 20px;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #2d3748;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+/* Patients List */
+.patients-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.patient-item {
+  padding: 15px;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.patient-item:last-child {
+  border-bottom: none;
+}
+
+.patient-item.high-risk {
+  border-left: 4px solid #dc3545;
+  background: #fff5f5;
+}
+
+.patient-info {
+  flex: 1;
+}
+
+.patient-name {
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 5px;
+}
+
+.patient-details {
+  display: flex;
+  gap: 15px;
+  font-size: 0.85rem;
+  color: #718096;
+}
+
+.detail {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Activities List */
+.activities-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.activity-item {
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.activity-item:not(:last-child) {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #007bff;
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-text {
+  color: #2d3748;
+  margin-bottom: 3px;
+}
+
+.activity-time {
+  font-size: 0.85rem;
+  color: #718096;
+}
+
+/* Quick Actions */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.quick-action-btn {
+  padding: 20px;
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.quick-action-btn:hover {
+  background: #007bff;
+  border-color: #007bff;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.quick-action-btn i {
+  font-size: 1.5rem;
+}
+
+.quick-action-btn span {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #718096;
+}
+
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  color: #cbd5e0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .doctor-nav {
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px;
+  }
+
+  .welcome-banner {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .welcome-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Loading animation */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.loading {
+  animation: pulse 1.5s infinite;
+}

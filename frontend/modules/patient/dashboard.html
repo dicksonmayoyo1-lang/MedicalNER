@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" class="dashboard-page patient-dashboard">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Health - Medical RAG</title>
+    <link rel="stylesheet" href="/frontend/base.css" />
+    <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="dashboard-page patient-dashboard">
+    <!-- Navigation will be loaded here -->
+    <div id="navigation"></div>
+
+    <!-- Patient-specific navigation -->
+    <nav class="patient-nav">
+        <a href="/frontend/modules/patient/dashboard.html" class="nav-link active">
+            <i class="fas fa-home"></i> Overview
+        </a>
+        <a href="/frontend/modules/patient/records/view.html" class="nav-link">
+            <i class="fas fa-file-medical"></i> My Records
+        </a>
+        <a href="/frontend/modules/patient/appointments.html" class="nav-link">
+            <i class="fas fa-calendar-alt"></i> Appointments
+        </a>
+        <a href="/frontend/modules/patient/medications.html" class="nav-link">
+            <i class="fas fa-pills"></i> Medications
+        </a>
+        <div class="nav-spacer"></div>
+        <div class="user-menu">
+            <button class="user-btn" id="user-menu-btn">
+                <i class="fas fa-user"></i>
+                <span id="user-name">Loading...</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="user-dropdown hidden" id="user-dropdown">
+                <a href="/frontend/modules/patient/profile/profile.html"><i class="fas fa-user"></i> Profile</a>
+                <a href="/frontend/modules/patient/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Welcome Banner -->
+        <div class="welcome-banner">
+            <div class="welcome-text">
+                <h1 id="welcome-title">Welcome</h1>
+                <p id="welcome-subtitle">Your Health Dashboard</p>
+            </div>
+            <div class="welcome-actions">
+                <button class="btn btn-primary"
+                    onclick="window.location.href='/frontend/modules/patient/upload-record.html'">
+                    <i class="fas fa-upload"></i> Upload Record
+                </button>
+                <button class="btn btn-success"
+                    onclick="window.location.href='/frontend/modules/patient/request-appointment.html'">
+                    <i class="fas fa-calendar-plus"></i> Book Appointment
+                </button>
+            </div>
+        </div>
+
+        <!-- Health Summary -->
+        <div class="health-summary">
+            <div class="summary-card">
+                <div class="summary-header">
+                    <h3><i class="fas fa-heartbeat"></i> Health Status</h3>
+                    <span class="badge badge-success" id="health-status">Good</span>
+                </div>
+                <div class="summary-body">
+                    <div class="health-metric">
+                        <div class="metric-label">Last Screening</div>
+                        <div class="metric-value" id="last-screening">Never</div>
+                    </div>
+                    <div class="health-metric">
+                        <div class="metric-label">Risk Level</div>
+                        <div class="metric-value">
+                            <span class="badge badge-low" id="risk-level">Low</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-header">
+                    <h3><i class="fas fa-file-medical-alt"></i> Medical Records</h3>
+                </div>
+                <div class="summary-body">
+                    <div class="health-metric">
+                        <div class="metric-label">Total Records</div>
+                        <div class="metric-value" id="total-my-records">0</div>
+                    </div>
+                    <div class="health-metric">
+                        <div class="metric-label">Last Upload</div>
+                        <div class="metric-value" id="last-upload">Never</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-header">
+                    <h3><i class="fas fa-calendar-check"></i> Upcoming</h3>
+                </div>
+                <div class="summary-body">
+                    <div class="health-metric">
+                        <div class="metric-label">Next Appointment</div>
+                        <div class="metric-value" id="next-appointment">None</div>
+                    </div>
+                    <div class="health-metric">
+                        <div class="metric-label">Medication Refill</div>
+                        <div class="metric-value" id="next-refill">None</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Records -->
+        <div class="content-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-history"></i>
+                    Recent Medical Records
+                </h3>
+                <a href="/frontend/modules/patient/records/view.html" class="btn-link">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="loading" id="records-loading">
+                    <i class="fas fa-spinner fa-spin"></i> Loading your records...
+                </div>
+                <div class="records-list" id="recent-records"></div>
+            </div>
+        </div>
+
+        <!-- Health Recommendations -->
+        <div class="content-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-lightbulb"></i>
+                    Health Recommendations
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="recommendations" id="health-recommendations">
+                    <div class="recommendation">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>Schedule your annual check-up</span>
+                    </div>
+                    <div class="recommendation">
+                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                        <span>Upload your recent lab results</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/frontend/shared/api.js"></script>
+    <script src="/frontend/shared/utils.js"></script>
+    <script src="/frontend/auth/auth.js"></script>
+    <script src="dashboard.js"></script>
+    <script>
+        // Load shared navigation
+        fetch("/frontend/shared/nav.html")
+            .then((response) => response.text())
+            .then((html) => {
+                document.getElementById("navigation").innerHTML = html;
+            })
+            .catch(console.error);
+
+        // Check auth on page load
+        document.addEventListener("DOMContentLoaded", function () {
+            const auth = AuthApp.checkAuth();
+            if (!auth || auth.user.role !== "patient") {
+                window.location.href = "/frontend/auth/login.html";
+                return;
+            }
+
+            // Initialize dashboard
+            if (window.PatientDashboard) {
+                new PatientDashboard();
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en" class="dashboard-page doctor-dashboard">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Appointments - Medical RAG</title>
+    <link rel="stylesheet" href="/frontend/base.css">
+    <link rel="stylesheet" href="/frontend/modules/doctor/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .appointments-container {
+            margin-top: 20px;
+        }
+
+        .appointment-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #dee2e6;
+        }
+
+        .appointment-card.pending {
+            border-left-color: #ffc107;
+        }
+
+        .appointment-card.confirmed {
+            border-left-color: #28a745;
+        }
+
+        .appointment-card.cancelled {
+            border-left-color: #dc3545;
+        }
+
+        .appointment-card.completed {
+            border-left-color: #17a2b8;
+        }
+
+        .appointment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .appointment-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .filter-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            font-weight: 500;
+            color: #6c757d;
+        }
+
+        .filter-tab.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+    </style>
+</head>
+
+<body class="dashboard-page doctor-dashboard">
+    <!-- Navigation will be loaded here -->
+    <div id="navigation"></div>
+
+    <!-- Doctor-specific navigation -->
+    <nav class="doctor-nav">
+        <a href="/frontend/modules/doctor/dashboard.html" class="nav-link">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+        <a href="/frontend/modules/doctor/patients/manage.html" class="nav-link">
+            <i class="fas fa-users"></i> Patients
+        </a>
+        <a href="/frontend/modules/doctor/appointments/manage.html" class="nav-link active">
+            <i class="fas fa-calendar-check"></i> Appointments
+        </a>
+        <a href="/frontend/modules/doctor/screening/screening.html" class="nav-link">
+            <i class="fas fa-search-medical"></i> Screening
+        </a>
+        <a href="/frontend/modules/doctor/analytics/analytics.html" class="nav-link">
+            <i class="fas fa-file-medical"></i> Records
+        </a>
+        <div class="nav-spacer"></div>
+        <div class="user-menu">
+            <button class="user-btn" id="user-menu-btn">
+                <i class="fas fa-user-md"></i>
+                <span id="user-name">Loading...</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="user-dropdown hidden" id="user-dropdown">
+                <a href="/frontend/modules/doctor/profile/profile.html"><i class="fas fa-user"></i> Profile</a>
+                <a href="/frontend/modules/doctor/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-calendar-check"></i> Manage Appointments</h1>
+            <p>View and manage patient appointment requests</p>
+        </div>
+
+        <div class="filter-tabs">
+            <button class="filter-tab active" onclick="filterAppointments('all')">All</button>
+            <button class="filter-tab" onclick="filterAppointments('pending')">Pending</button>
+            <button class="filter-tab" onclick="filterAppointments('confirmed')">Confirmed</button>
+            <button class="filter-tab" onclick="filterAppointments('completed')">Completed</button>
+            <button class="filter-tab" onclick="filterAppointments('cancelled')">Cancelled</button>
+        </div>
+
+        <div class="content-card">
+            <div class="card-header">
+                <h3 class="card-title" id="appointments-title">All Appointments</h3>
+            </div>
+            <div class="card-body">
+                <div id="appointments-loading" class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Loading appointments...
+                </div>
+                <div id="appointments-content" class="hidden">
+                    <div id="appointments-list" class="appointments-container"></div>
+                </div>
+                <div id="appointments-empty" class="hidden">
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-times"></i>
+                        <h3>No Appointments</h3>
+                        <p id="empty-message">No appointments found.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Appointment Modal -->
+    <div id="confirm-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="closeConfirmModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Appointment</h3>
+                <button class="modal-close" onclick="closeConfirmModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="confirm-form">
+                    <input type="hidden" id="confirm-appointment-id">
+                    <div class="form-group">
+                        <label for="scheduled-date">Scheduled Date</label>
+                        <input type="date" id="scheduled-date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="scheduled-time">Scheduled Time</label>
+                        <select id="scheduled-time" class="form-control" required>
+                            <option value="">Select time...</option>
+                            <option value="09:00">9:00 AM</option>
+                            <option value="10:00">10:00 AM</option>
+                            <option value="11:00">11:00 AM</option>
+                            <option value="12:00">12:00 PM</option>
+                            <option value="14:00">2:00 PM</option>
+                            <option value="15:00">3:00 PM</option>
+                            <option value="16:00">4:00 PM</option>
+                            <option value="17:00">5:00 PM</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="doctor-notes">Doctor Notes (optional)</label>
+                        <textarea id="doctor-notes" class="form-control" rows="3"
+                            placeholder="Add any notes for the patient..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Confirm Appointment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/frontend/shared/api.js"></script>
+    <script src="/frontend/shared/utils.js"></script>
+    <script src="/frontend/auth/auth.js"></script>
+    <script>
+        let currentFilter = 'all';
+        let allAppointments = [];
+
+        // Check auth on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const auth = AuthApp.checkAuth();
+            if (!auth || auth.user.role !== 'doctor') {
+                window.location.href = '/frontend/auth/login.html';
+                return;
+            }
+
+            // Update user name in nav
+            document.getElementById('user-name').textContent = auth.user.full_name || auth.user.username;
+
+            // Load appointments
+            loadAppointments();
+
+            // Bind events
+            document.getElementById('confirm-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                confirmAppointment();
+            });
+
+            document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                AuthApp.logout();
+            });
+
+            // User menu toggle
+            document.getElementById('user-menu-btn')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('user-dropdown').classList.toggle('hidden');
+            });
+        });
+
+        async function loadAppointments() {
+            try {
+                allAppointments = await window.medicalAPI.get('/doctor/appointments/all');
+                filterAppointments(currentFilter);
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+                document.getElementById('appointments-loading').innerHTML =
+                    '<div class="error"><i class="fas fa-exclamation-triangle"></i> Error loading appointments</div>';
+            }
+        }
+
+        function filterAppointments(status) {
+            currentFilter = status;
+
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.textContent.toLowerCase().includes(status) ||
+                    (status === 'all' && tab.textContent.toLowerCase() === 'all')) {
+                    tab.classList.add('active');
+                }
+            });
+
+            // Update title
+            const titles = {
+                'all': 'All Appointments',
+                'pending': 'Pending Appointments',
+                'confirmed': 'Confirmed Appointments',
+                'completed': 'Completed Appointments',
+                'cancelled': 'Cancelled Appointments'
+            };
+            document.getElementById('appointments-title').textContent = titles[status] || 'Appointments';
+
+            // Filter appointments
+            const filtered = status === 'all'
+                ? allAppointments
+                : allAppointments.filter(apt => apt.status === status);
+
+            displayAppointments(filtered);
+        }
+
+        function displayAppointments(appointments) {
+            document.getElementById('appointments-loading').classList.add('hidden');
+
+            if (appointments.length === 0) {
+                document.getElementById('appointments-content').classList.add('hidden');
+                document.getElementById('appointments-empty').classList.remove('hidden');
+                const messages = {
+                    'all': 'No appointments found.',
+                    'pending': 'No pending appointments.',
+                    'confirmed': 'No confirmed appointments.',
+                    'completed': 'No completed appointments.',
+                    'cancelled': 'No cancelled appointments.'
+                };
+                document.getElementById('empty-message').textContent = messages[currentFilter] || 'No appointments found.';
+                return;
+            }
+
+            document.getElementById('appointments-content').classList.remove('hidden');
+            document.getElementById('appointments-empty').classList.add('hidden');
+
+            const list = document.getElementById('appointments-list');
+            list.innerHTML = appointments.map(apt => {
+                const statusBadge = getStatusBadge(apt.status);
+                const dateStr = apt.scheduled_date || apt.preferred_date;
+                const timeStr = apt.scheduled_time || apt.preferred_time;
+                const formattedDate = dateStr ? new Date(dateStr).toLocaleDateString() : 'TBD';
+
+                // Get patient info (would need patient service)
+                const patientInfo = apt.patient_id || 'Unknown Patient';
+
+                return `
+                    <div class="appointment-card ${apt.status}">
+                        <div class="appointment-header">
+                            <div>
+                                <h4 style="margin: 0 0 8px 0; text-transform: capitalize;">${apt.type || 'Appointment'}</h4>
+                                <p style="margin: 4px 0;"><i class="fas fa-user-injured"></i> <strong>Patient ID:</strong> ${patientInfo}</p>
+                                <p style="margin: 4px 0;"><i class="fas fa-calendar"></i> <strong>Date:</strong> ${formattedDate}</p>
+                                <p style="margin: 4px 0;"><i class="fas fa-clock"></i> <strong>Time:</strong> ${timeStr || 'TBD'}</p>
+                                <p style="margin: 8px 0 0 0; color: #6c757d;"><strong>Reason:</strong> ${window.Utils.escapeHtml(apt.reason || 'No reason provided')}</p>
+                                ${apt.doctor_notes ? `<p style="margin: 8px 0 0 0; color: #495057; font-style: italic;"><strong>Notes:</strong> ${window.Utils.escapeHtml(apt.doctor_notes)}</p>` : ''}
+                            </div>
+                            <div>
+                                ${statusBadge}
+                            </div>
+                        </div>
+                        <div class="appointment-actions">
+                            ${apt.status === 'pending' ? `
+                                <button class="btn btn-sm btn-success" onclick="openConfirmModal('${apt.id}', '${apt.preferred_date}', '${apt.preferred_time}')">
+                                    <i class="fas fa-check"></i> Confirm
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="cancelAppointment('${apt.id}')">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            ` : ''}
+                            ${apt.status === 'confirmed' ? `
+                                <button class="btn btn-sm btn-primary" onclick="completeAppointment('${apt.id}')">
+                                    <i class="fas fa-check-circle"></i> Mark Complete
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="cancelAppointment('${apt.id}')">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'pending': '<span class="badge badge-warning">Pending</span>',
+                'confirmed': '<span class="badge badge-success">Confirmed</span>',
+                'cancelled': '<span class="badge badge-danger">Cancelled</span>',
+                'completed': '<span class="badge badge-info">Completed</span>'
+            };
+            return badges[status] || '<span class="badge">Unknown</span>';
+        }
+
+        function openConfirmModal(appointmentId, preferredDate, preferredTime) {
+            document.getElementById('confirm-appointment-id').value = appointmentId;
+            document.getElementById('scheduled-date').value = preferredDate || '';
+            document.getElementById('scheduled-time').value = preferredTime || '';
+            document.getElementById('doctor-notes').value = '';
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').classList.add('hidden');
+        }
+
+        async function confirmAppointment() {
+            const appointmentId = document.getElementById('confirm-appointment-id').value;
+            const scheduledDate = document.getElementById('scheduled-date').value;
+            const scheduledTime = document.getElementById('scheduled-time').value;
+            const doctorNotes = document.getElementById('doctor-notes').value;
+
+            if (!scheduledDate || !scheduledTime) {
+                alert('Please select both date and time');
+                return;
+            }
+
+            try {
+                await window.medicalAPI.post(`/doctor/appointments/${appointmentId}/confirm`, {
+                    scheduled_date: scheduledDate,
+                    scheduled_time: scheduledTime,
+                    doctor_notes: doctorNotes || null
+                });
+
+                alert('Appointment confirmed successfully!');
+                closeConfirmModal();
+                loadAppointments();
+            } catch (error) {
+                console.error('Error confirming appointment:', error);
+                alert('Error confirming appointment. Please try again.');
+            }
+        }
+
+        async function cancelAppointment(appointmentId) {
+            if (!confirm('Are you sure you want to cancel this appointment?')) {
+                return;
+            }
+
+            const reason = prompt('Please provide a reason for cancellation (optional):');
+
+            try {
+                await window.medicalAPI.post(`/doctor/appointments/${appointmentId}/cancel`, {
+                    reason: reason || null
+                });
+
+                alert('Appointment cancelled successfully');
+                loadAppointments();
+            } catch (error) {
+                console.error('Error cancelling appointment:', error);
+                alert('Error cancelling appointment. Please try again.');
+            }
+        }
+
+        async function completeAppointment(appointmentId) {
+            const notes = prompt('Add completion notes (optional):');
+
+            try {
+                await window.medicalAPI.post(`/doctor/appointments/${appointmentId}/complete`, {
+                    notes: notes || null
+                });
+
+                alert('Appointment marked as completed');
+                loadAppointments();
+            } catch (error) {
+                console.error('Error completing appointment:', error);
+                alert('Error completing appointment. Please try again.');
+            }
+        }
+    </script>
+      <script src="dashboard.js"></script>
+</body>
+
+</html>

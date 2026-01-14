@@ -1,0 +1,330 @@
+/* Patient Records Page Styles */
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 28px;
+  color: var(--accent);
+}
+
+.page-header p {
+  margin: 5px 0 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 25px;
+}
+
+.stat-card {
+  background: var(--card);
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card h3 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.stat-card p {
+  margin: 0;
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--accent);
+}
+
+/* Records List */
+.records-list {
+  display: grid;
+  gap: 16px;
+}
+
+.record-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.record-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.record-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.record-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  font-size: 16px;
+}
+
+.record-title i {
+  color: #e74c3c;
+}
+
+.record-date {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.record-card-body {
+  margin-bottom: 15px;
+}
+
+.record-stats {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.stat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #f0f4f8;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #374151;
+}
+
+.stat-badge i {
+  color: var(--accent);
+}
+
+.record-summary-preview {
+  background: #f9f9f9;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 4px solid var(--accent);
+  font-size: 14px;
+  line-height: 1.5;
+  color: #374151;
+}
+
+.record-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 15px;
+  border-top: 1px solid var(--border);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}
+
+.empty-state i {
+  font-size: 48px;
+  margin-bottom: 15px;
+  color: var(--muted);
+}
+
+.empty-state.error i {
+  color: #e74c3c;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 16px;
+}
+
+/* Record Detail Modal */
+.modal-large {
+  max-width: 900px;
+  width: 90%;
+}
+
+.record-detail {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.detail-section {
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-section:last-child {
+  border-bottom: none;
+}
+
+.detail-section h4 {
+  margin-top: 0;
+  color: var(--accent);
+  margin-bottom: 15px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-section h4 i {
+  color: var(--accent);
+}
+
+.summary-box {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 6px;
+  border-left: 4px solid var(--accent);
+  line-height: 1.6;
+  font-size: 14px;
+  color: #374151;
+}
+
+.text-preview {
+  background: #f5f7fa;
+  padding: 15px;
+  border-radius: 6px;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  max-height: 300px;
+  overflow-y: auto;
+  line-height: 1.5;
+  color: #374151;
+}
+
+.metadata-box {
+  background: #f5f7fa;
+  padding: 15px;
+  border-radius: 6px;
+}
+
+.metadata-box p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+.metadata-box strong {
+  color: var(--accent);
+}
+
+/* Entities Section */
+.entities-section {
+  margin-bottom: 20px;
+}
+
+.entities-section h4 {
+  margin-bottom: 12px;
+}
+
+.entities-list {
+  display: grid;
+  gap: 10px;
+}
+
+.entity-item {
+  background: #f9f9f9;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 3px solid var(--accent);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.entity-text {
+  font-weight: 600;
+  color: var(--accent);
+  flex: 1;
+  min-width: 150px;
+}
+
+.entity-code,
+.entity-value,
+.entity-range,
+.entity-unit,
+.entity-score {
+  padding: 4px 8px;
+  background: #e8f0f8;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #374151;
+}
+
+.entity-code {
+  background: #fff3cd;
+}
+
+.entity-value {
+  background: #d1ecf1;
+}
+
+.entity-range {
+  background: #d4edda;
+}
+
+.entity-score {
+  background: #f8d7da;
+}
+
+.no-data {
+  color: var(--muted);
+  font-style: italic;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .record-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .modal-large {
+    width: 95%;
+  }
+}

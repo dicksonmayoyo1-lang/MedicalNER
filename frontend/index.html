@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" class="auth-page">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Medical RAG System</title>
+    <link rel="stylesheet" href="/frontend/base.css">
+    <link rel="stylesheet" href="/frontend/auth/auth.css">
+    <link rel="stylesheet" href="/frontend/assets/all.min.css">
+</head>
+
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1><i class="fas fa-stethoscope"></i> Medical RAG</h1>
+            <p>Clinical Intelligence Platform</p>
+        </div>
+
+        <div class="auth-body">
+            <div class="auth-message error" id="error-message"></div>
+            <div class="auth-message success" id="success-message"></div>
+
+            <form class="auth-form" id="login-form">
+                <div class="form-group">
+                    <label class="form-label" for="username">
+                        <i class="fas fa-user"></i> Username
+                    </label>
+                    <input type="text" id="username" class="form-control" placeholder="Enter your username" required>
+                    <div class="error-message" id="username-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <input type="password" id="password" class="form-control" placeholder="Enter your password"
+                        required>
+                    <div class="error-message" id="password-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="auth-btn" id="login-btn">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </div>
+
+                <div class="form-group text-center">
+                    <a href="#" id="forgot-password">Forgot Password?</a>
+                </div>
+            </form>
+
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="/frontend/auth/register.html">Register here</a></p>
+                <p class="small">Default credentials:<br>
+                    Doctor: doctor1 / doctor123<br>
+                    Patient: patient1 / patient123</p>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="/frontend/shared/api.js"></script>
+    <script src="/frontend/shared/utils.js"></script>
+    <script src="/frontend/auth/auth.js"></script>
+    <script>
+        // Initialize login page
+        if (window.AuthApp) {
+            new AuthApp('login');
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" class="dashboard-page doctor-dashboard">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Patient Records - Medical RAG</title>
+    <link rel="stylesheet" href="/frontend/base.css">
+    <link rel="stylesheet" href="/frontend/modules/doctor/dashboard.css">
+    <link rel="stylesheet" href="patient-records.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="dashboard-page doctor-dashboard">
+    <div id="navigation"></div>
+
+    <!-- Doctor-specific navigation -->
+    <nav class="doctor-nav">
+        <a href="/frontend/modules/doctor/dashboard.html" class="nav-link">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+        <a href="/frontend/modules/doctor/patients/manage.html" class="nav-link active">
+            <i class="fas fa-users"></i> Patients
+        </a>
+        <a href="/frontend/modules/doctor/appointments/manage.html" class="nav-link">
+            <i class="fas fa-calendar-check"></i> Appointments
+        </a>
+        <a href="/frontend/modules/doctor/screening/screening.html" class="nav-link">
+            <i class="fas fa-search-medical"></i> Screening
+        </a>
+        <a href="/frontend/modules/doctor/analytics/analytics.html" class="nav-link">
+            <i class="fas fa-file-medical"></i> Records
+        </a>
+        <a href="/frontend/modules/doctor/analytics/analytics.html" class="nav-link">
+            <i class="fas fa-chart-bar"></i> Analytics
+        </a>
+        <div class="nav-spacer"></div>
+        <div class="user-menu">
+            <button class="user-btn" id="user-menu-btn">
+                <i class="fas fa-user-md"></i>
+                <span id="user-name">Loading...</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="user-dropdown hidden" id="user-dropdown">
+                <a href="/frontend/modules/doctor/profile/profile.html"><i class="fas fa-user"></i> Profile</a>
+                <a href="/frontend/modules/doctor/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <div class="header-left">
+                <button class="btn btn-secondary" onclick="window.history.back()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <div style="margin-left: 15px;">
+                    <h1><i class="fas fa-file-medical"></i> Patient Records</h1>
+                    <p id="patient-info">Loading patient information...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <div class="card-header">
+                <h3 class="card-title">Medical Records</h3>
+                <button id="refresh-btn" class="btn btn-secondary">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="records-loading" class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Loading records...
+                </div>
+                <div id="records-content" class="hidden">
+                    <div id="records-stats" class="stats-row">
+                        <div class="stat-card">
+                            <h3>Total Records</h3>
+                            <p id="total-records">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Diseases Found</h3>
+                            <p id="total-diseases">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Lab Results</h3>
+                            <p id="total-labs">0</p>
+                        </div>
+                    </div>
+
+                    <div id="records-list" class="records-list">
+                        <!-- Records will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Detail Modal -->
+    <div id="record-detail-modal" class="modal hidden" aria-hidden="true">
+        <div class="modal-backdrop" onclick="closeRecordDetail()"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="record-detail-title">Record Details</h3>
+                <button class="modal-close" onclick="closeRecordDetail()">✕</button>
+            </div>
+            <div id="record-detail-body" class="modal-body">
+                <!-- Record details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/frontend/shared/api.js"></script>
+    <script src="/frontend/shared/utils.js"></script>
+    <script src="/frontend/auth/auth.js"></script>
+    <script src="patient-records.js"></script>
+    <script>
+        function closeRecordDetail() {
+            document.getElementById("record-detail-modal").classList.add("hidden");
+            document.getElementById("record-detail-modal").setAttribute("aria-hidden", "true");
+            document.body.style.overflow = "";
+        }
+
+        // Load shared navigation
+        fetch('/frontend/shared/nav.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navigation').innerHTML = html;
+            })
+            .catch(console.error);
+
+        // Check auth on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const auth = AuthApp.checkAuth();
+            if (!auth || auth.user.role !== 'doctor') {
+                window.location.href = '/frontend/auth/login.html';
+                return;
+            }
+
+            // Update user name in nav
+            document.getElementById('user-name').textContent = auth.user.full_name || auth.user.username;
+
+            // Bind events
+            document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                AuthApp.logout();
+            });
+
+            document.getElementById('user-menu-btn')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('user-dropdown').classList.toggle('hidden');
+            });
+
+            document.getElementById('refresh-btn')?.addEventListener('click', () => {
+                if (window.patientRecordsApp) {
+                    window.patientRecordsApp.loadRecords();
+                }
+            });
+
+            // Get patient_id from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('patient_id');
+            
+            if (!patientId) {
+                alert('No patient ID provided');
+                window.location.href = '/frontend/modules/doctor/patients/manage.html';
+                return;
+            }
+
+            // Initialize app
+            if (window.patientRecordsApp) {
+                window.patientRecordsApp.init(patientId);
+            }
+        });
+    </script>
+      <script src="/frontend/modules/doctor/dashboard.js"></script>
+
+</body>
+
+</html>

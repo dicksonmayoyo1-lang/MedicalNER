@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" class="dashboard-page doctor-dashboard">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doctor Dashboard - Medical RAG</title>
+  <link rel="stylesheet" href="/frontend/base.css">
+  <link rel="stylesheet" href="/frontend/modules/doctor/dashboard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+
+<body class="dashboard-page doctor-dashboard">
+  <div id="navigation"></div>
+
+  <!-- Doctor-specific navigation -->
+  <nav class="doctor-nav">
+    <a href="/frontend/modules/doctor/dashboard.html" class="nav-link active">
+      <i class="fas fa-home"></i> Dashboard
+    </a>
+    <a href="/frontend/modules/doctor/patients/manage.html" class="nav-link">
+      <i class="fas fa-users"></i> Patients
+    </a>
+    <a href="/frontend/modules/doctor/appointments/manage.html" class="nav-link">
+      <i class="fas fa-calendar-check"></i> Appointments
+    </a>
+    <a href="/frontend/modules/doctor/screening/screening.html" class="nav-link">
+      <i class="fas fa-search-medical"></i> Screening
+    </a>
+    <a href="/frontend/modules/doctor/analytics/analytics.html" class="nav-link">
+      <i class="fas fa-file-medical"></i> Records
+    </a>
+    <a href="/frontend/modules/doctor/analytics/analytics.html" class="nav-link">
+      <i class="fas fa-chart-bar"></i> Analytics
+    </a>
+    <div class="nav-spacer"></div>
+    <div class="user-menu">
+      <button class="user-btn" id="user-menu-btn">
+        <i class="fas fa-user-md"></i>
+        <span id="user-name">Loading...</span>
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      <div class="user-dropdown hidden" id="user-dropdown">
+        <a href="/frontend/modules/doctor/profile/profile.html"><i class="fas fa-user"></i> Profile</a>
+        <a href="/frontend/modules/doctor/settings.html"><i class="fas fa-cog"></i> Settings</a>
+        <div class="dropdown-divider"></div>
+        <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+      <div class="welcome-text">
+        <h1 id="welcome-title">Welcome, Doctor</h1>
+        <p id="welcome-subtitle">Medical Intelligence Dashboard</p>
+      </div>
+      <div class="welcome-actions">
+        <button class="btn btn-primary">
+          <i class="fas fa-plus"></i> New Patient
+        </button>
+        <button class="btn btn-success">
+          <i class="fas fa-play"></i> Run Screening
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #4e73df">
+          <i class="fas fa-user-injured"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value" id="total-patients">0</div>
+          <div class="stat-label">Total Patients</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #1cc88a">
+          <i class="fas fa-file-medical-alt"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value" id="total-records">0</div>
+          <div class="stat-label">Medical Records</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #36b9cc">
+          <i class="fas fa-search"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value" id="screenings-today">0</div>
+          <div class="stat-label">Screenings Today</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background: #f6c23e">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value" id="high-risk-cases">0</div>
+          <div class="stat-label">High Risk Cases</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-grid">
+      <!-- Recent High Risk Patients -->
+      <div class="content-card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-exclamation-circle text-danger"></i>
+            High Risk Patients
+          </h3>
+          <a href="#" class="btn-link">View All</a>
+        </div>
+        <div class="card-body">
+          <div class="loading" id="high-risk-loading">
+            <i class="fas fa-spinner fa-spin"></i> Loading...
+          </div>
+          <div class="patients-list" id="high-risk-list"></div>
+        </div>
+      </div>
+
+      <!-- Recent Activities -->
+      <div class="content-card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-history"></i>
+            Recent Activities
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="activities-list" id="activities-list">
+            <!-- Activities will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="content-card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-bolt"></i>
+            Quick Actions
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="quick-actions">
+            <button class="quick-action-btn"
+              onclick="window.location.href='/frontend/modules/doctor/screening/screening.html'">
+              <i class="fas fa-search-medical"></i>
+              <span>Run Screening</span>
+            </button>
+            <button class="quick-action-btn"
+              onclick="window.location.href='/frontend/modules/doctor/patients/manage.html'">
+              <i class="fas fa-user-plus"></i>
+              <span>Add Patient</span>
+            </button>
+            <button class="quick-action-btn" onclick="window.location.href='/frontend/modules/doctor/process.html'">
+              <i class="fas fa-file-upload"></i>
+              <span>Upload Records</span>
+            </button>
+            <button class="quick-action-btn"
+              onclick="window.location.href='/frontend/modules/doctor/analytics/analytics.html'">
+              <i class="fas fa-chart-line"></i>
+              <span>View Analytics</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/frontend/shared/api.js"></script>
+  <script src="/frontend/shared/utils.js"></script>
+  <script src="/frontend/auth/auth.js"></script>
+  <script src="dashboard.js"></script>
+  <script>
+    // Load shared navigation
+    fetch("/frontend/shared/nav.html")
+      .then((response) => response.text())
+      .then((html) => {
+        document.getElementById("navigation").innerHTML = html;
+      })
+      .catch(console.error);
+
+    // Check auth on page load
+    document.addEventListener("DOMContentLoaded", function () {
+      const auth = AuthApp.checkAuth();
+      if (!auth || auth.user.role !== "doctor") {
+        window.location.href = "/frontend/auth/login.html";
+        return;
+      }
+
+      // Update user name in nav
+      const userNameEl = document.getElementById("user-name");
+      if (userNameEl) {
+        userNameEl.textContent = auth.user.full_name || auth.user.username;
+      }
+
+      // Initialize dashboard (this should handle dropdown and logout via bindEvents)
+      if (window.DoctorDashboard) {
+        new DoctorDashboard();
+      } else {
+        // Fallback if DoctorDashboard doesn't exist
+        // User menu toggle
+        document.getElementById("user-menu-btn")?.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const dropdown = document.getElementById("user-dropdown");
+          if (dropdown) {
+            dropdown.classList.toggle("hidden");
+          }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener("click", (e) => {
+          const dropdown = document.getElementById("user-dropdown");
+          const menuBtn = document.getElementById("user-menu-btn");
+          if (dropdown && menuBtn && !menuBtn.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add("hidden");
+          }
+        });
+
+        // Logout
+        document.getElementById("logout-btn")?.addEventListener("click", (e) => {
+          e.preventDefault();
+          AuthApp.logout();
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>

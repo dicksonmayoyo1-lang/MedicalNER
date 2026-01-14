@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" class="auth-page">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Medical RAG System</title>
+    <link rel="stylesheet" href="/frontend/base.css">
+    <link rel="stylesheet" href="/frontend/auth/auth.css">
+    <link rel="stylesheet" href="/frontend/assets/all.min.css">
+</head>
+
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1><i class="fas fa-user-plus"></i> Create Account</h1>
+            <p>Join our medical platform</p>
+        </div>
+
+        <div class="auth-body">
+            <div class="auth-message error" id="error-message"></div>
+            <div class="auth-message success" id="success-message"></div>
+
+            <form class="auth-form" id="register-form">
+                <div class="form-group">
+                    <label class="form-label" for="full_name">
+                        <i class="fas fa-id-card"></i> Full Name
+                    </label>
+                    <input type="text" id="full_name" class="form-control" placeholder="Enter your full name">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">
+                        <i class="fas fa-envelope"></i> Email
+                    </label>
+                    <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
+                    <div class="error-message" id="email-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="username">
+                        <i class="fas fa-user"></i> Username
+                    </label>
+                    <input type="text" id="username" class="form-control" placeholder="Choose a username" required>
+                    <div class="error-message" id="username-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <input type="password" id="password" class="form-control" placeholder="Choose a password" required>
+                    <div class="error-message" id="password-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="confirm_password">
+                        <i class="fas fa-lock"></i> Confirm Password
+                    </label>
+                    <input type="password" id="confirm_password" class="form-control"
+                        placeholder="Confirm your password" required>
+                    <div class="error-message" id="confirm-password-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Select Your Role</label>
+                    <div class="role-selector">
+                        <div class="role-option" data-role="patient">
+                            <i class="fas fa-user-injured"></i>
+                            <span class="role-name">Patient</span>
+                            <span class="role-desc">View your records</span>
+                        </div>
+                        <div class="role-option" data-role="doctor">
+                            <i class="fas fa-user-md"></i>
+                            <span class="role-name">Doctor</span>
+                            <span class="role-desc">Access all features</span>
+                        </div>
+                    </div>
+                    <input type="hidden" id="role" value="patient" required>
+                    <div class="error-message" id="role-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="auth-btn" id="register-btn">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </button>
+                </div>
+            </form>
+
+            <div class="auth-footer">
+                <p>Already have an account? <a href="/frontend/auth/login.html">Login here</a></p>
+                <p class="small">By registering, you agree to our Terms of Service</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/frontend/shared/api.js"></script>
+    <script src="/frontend/shared/utils.js"></script>
+    <script src="/frontend/auth/auth.js"></script>
+    <script>
+        // Initialize register page
+        if (window.AuthApp) {
+            new AuthApp('register');
+        }
+    </script>
+</body>
+
+</html>

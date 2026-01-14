@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Medical Document Analyzer - Process Documents</title>
+    <link rel="stylesheet" href="/frontend/base.css">
+    <link rel="stylesheet" href="/frontend/modules/doctor/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="process.css">
+</head>
+
+<body>
+    <div id="navigation"></div>
+
+    <!-- Doctor-specific navigation -->
+    <nav class="doctor-nav">
+        <a href="/frontend/modules/doctor/dashboard.html" class="nav-link active">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+        <a href="/frontend/modules/doctor/patients/manage.html" class="nav-link">
+            <i class="fas fa-users"></i> Patients
+        </a>
+        <a href="/frontend/modules/doctor/appointments/manage.html" class="nav-link">
+            <i class="fas fa-calendar-check"></i> Appointments
+        </a>
+        <a href="/frontend/modules/doctor/screening/screening.html" class="nav-link">
+            <i class="fas fa-search-medical"></i> Screening
+        </a>
+        <a href="/frontend/modules/doctor/analytics/analytics.html" class="nav-link">
+            <i class="fas fa-file-medical"></i> Records
+        </a>
+        <a href="/frontend/modules/doctor/analytics/analytics.html" class="nav-link">
+            <i class="fas fa-chart-bar"></i> Analytics
+        </a>
+        <div class="nav-spacer"></div>
+        <div class="user-menu">
+            <button class="user-btn" id="user-menu-btn">
+                <i class="fas fa-user-md"></i>
+                <span id="user-name">Loading...</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="user-dropdown hidden" id="user-dropdown">
+                <a href="/frontend/modules/doctor/profile/profile.html"><i class="fas fa-user"></i> Profile</a>
+                <a href="/frontend/modules/doctor/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+
+    <div class="main-container">
+        <h1>Process Medical Documents</h1>
+
+        <div class="input-section">
+            <textarea id="text-input" placeholder="Paste medical text here..." rows="8"></textarea>
+            <div class="file-row">
+                <input type="file" id="file-input" accept=".pdf" multiple />
+                <span id="file-count" style="font-size: 12px; color: var(--muted);"></span>
+                <button id="submit-btn" class="btn">Submit</button>
+            </div>
+
+            <div class="storage-options">
+                <label class="storage-checkbox">
+                    <input type="checkbox" id="store-checkbox" />
+                    Save to database
+                </label>
+                <div id="patient-id-input">
+                    <label>Patient ID (optional):</label>
+                    <input type="text" id="patient-id" placeholder="e.g., patient_001" />
+                </div>
+            </div>
+
+            <div class="options-row">
+                <label><input type="checkbox" id="show-json" /> Show raw JSON</label>
+            </div>
+        </div>
+
+        <div class="results-grid">
+            <div class="panel">
+                <h2>Metadata</h2>
+                <div id="metadata-output" class="meta"></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <h2>Extracted Text</h2>
+                    <button class="view-full-btn" id="view-full-text-btn">View full</button>
+                </div>
+                <div id="extracted-text" class="extracted plain-text collapsed"></div>
+            </div>
+
+            <div class="panel wide">
+                <div class="panel-head">
+                    <h2>Entities</h2>
+                    <button class="view-full-btn" id="view-full-table-btn">View full</button>
+                </div>
+                <div class="panel-head">
+                    <h2>Entities</h2>
+                    <div id="json-output" class="collapsed"></div>
+                </div>
+
+                <div class="panel wide">
+                    <div class="panel-head">
+                        <h2>Highlighted Text</h2>
+                        <button class="view-full-btn" id="view-full-highlight-btn">View full</button>
+                    </div>
+                    <div id="highlight-output" class="highlight-box collapsed"></div>
+                </div>
+
+                <div class="panel wide">
+                    <h2>Summary</h2>
+                    <div id="summary-output" class="summary"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div id="modal" class="modal" aria-hidden="true">
+            <div class="modal-backdrop" id="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title">Full content</h3>
+                    <button id="modal-close" class="modal-close">✕</button>
+                </div>
+                <div id="modal-body" class="modal-body"></div>
+                <div class="modal-footer">
+                    <button id="modal-copy" class="btn">Copy</button>
+                    <button id="modal-close-2" class="btn">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="/frontend/shared/api.js"></script>
+        <script src="/frontend/shared/utils.js"></script>
+        <script src="/frontend/auth/auth.js"></script>
+        <script>
+            // Load navigation
+            fetch('/frontend/shared/nav.html')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('navigation').innerHTML = html;
+                    // Mark current page as active
+                    const navProcess = document.getElementById('nav-process');
+                    if (navProcess) {
+                        navProcess.classList.add('active');
+                    }
+                });
+
+            // Check auth on page load
+            document.addEventListener('DOMContentLoaded', function () {
+                const auth = AuthApp.checkAuth();
+                if (!auth || auth.user.role !== 'doctor') {
+                    window.location.href = '/frontend/auth/login.html';
+                    return;
+                }
+
+                // Update user name in nav
+                const userNameEl = document.getElementById('user-name');
+                if (userNameEl) {
+                    userNameEl.textContent = auth.user.full_name || auth.user.username;
+                }
+
+                // User menu toggle
+                document.getElementById('user-menu-btn')?.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const dropdown = document.getElementById('user-dropdown');
+                    if (dropdown) {
+                        dropdown.classList.toggle('hidden');
+                    }
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    const dropdown = document.getElementById('user-dropdown');
+                    const menuBtn = document.getElementById('user-menu-btn');
+                    if (dropdown && menuBtn && !menuBtn.contains(e.target) && !dropdown.contains(e.target)) {
+                        dropdown.classList.add('hidden');
+                    }
+                });
+
+                // Logout
+                document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    AuthApp.logout();
+                });
+            });
+        </script>
+        <script src="process.js" defer></script>
+        <script src="/frontend/modules/doctor/dashboard.js"></script>
+
+</body>
+
+</html>

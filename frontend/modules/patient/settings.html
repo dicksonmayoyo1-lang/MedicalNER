@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" class="dashboard-page patient-dashboard">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Medical RAG</title>
+    <link rel="stylesheet" href="/frontend/base.css">
+    <link rel="stylesheet" href="/frontend/modules/patient/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="dashboard-page patient-dashboard">
+    <!-- Navigation will be loaded here -->
+    <div id="navigation"></div>
+
+    <!-- Patient-specific navigation -->
+    <nav class="patient-nav">
+        <a href="/frontend/modules/patient/dashboard.html" class="nav-link">
+            <i class="fas fa-home"></i> Overview
+        </a>
+        <a href="/frontend/modules/patient/records/view.html" class="nav-link">
+            <i class="fas fa-file-medical"></i> My Records
+        </a>
+        <a href="/frontend/modules/patient/appointments.html" class="nav-link">
+            <i class="fas fa-calendar-alt"></i> Appointments
+        </a>
+        <a href="/frontend/modules/patient/medications.html" class="nav-link">
+            <i class="fas fa-pills"></i> Medications
+        </a>
+        <div class="nav-spacer"></div>
+        <div class="user-menu">
+            <button class="user-btn" id="user-menu-btn">
+                <i class="fas fa-user"></i>
+                <span id="user-name">Loading...</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="user-dropdown hidden" id="user-dropdown">
+                <a href="/frontend/modules/patient/profile/profile.html"><i class="fas fa-user"></i> Profile</a>
+                <a href="/frontend/modules/patient/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-cog"></i> Settings</h1>
+            <p>Manage your account settings</p>
+        </div>
+
+        <div class="content-card">
+            <div class="card-header">
+                <h3 class="card-title">Account Settings</h3>
+            </div>
+            <div class="card-body">
+                <div class="settings-section">
+                    <h4>Notifications</h4>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" checked>
+                            <span>Email notifications for new records</span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" checked>
+                            <span>Appointment reminders</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section" style="margin-top: 30px;">
+                    <h4>Privacy</h4>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox">
+                            <span>Share anonymized data for research</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section" style="margin-top: 30px;">
+                    <h4>Account Actions</h4>
+                    <button class="btn btn-secondary" onclick="changePassword()">
+                        <i class="fas fa-key"></i> Change Password
+                    </button>
+                    <button class="btn btn-danger" onclick="deleteAccount()" style="margin-left: 10px;">
+                        <i class="fas fa-trash"></i> Delete Account
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/frontend/shared/api.js"></script>
+    <script src="/frontend/shared/utils.js"></script>
+    <script src="/frontend/auth/auth.js"></script>
+    <script>
+        // Check auth on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const auth = AuthApp.checkAuth();
+            if (!auth || auth.user.role !== 'patient') {
+                window.location.href = '/frontend/auth/login.html';
+                return;
+            }
+
+            // Update user name in nav
+            document.getElementById('user-name').textContent = auth.user.full_name || auth.user.username;
+
+            // Bind events
+            document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                AuthApp.logout();
+            });
+
+            // User menu toggle
+            document.getElementById('user-menu-btn')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('user-dropdown').classList.toggle('hidden');
+            });
+        });
+
+        function changePassword() {
+            alert('Password change feature coming soon!');
+        }
+
+        function deleteAccount() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                alert('Account deletion feature coming soon!');
+            }
+        }
+    </script>
+</body>
+
+</html>
+

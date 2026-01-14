@@ -1,0 +1,145 @@
+/* Stats page specific styles */
+.storage-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 25px;
+  background: var(--card);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.search-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 25px;
+}
+
+.stat-card {
+  background: var(--card);
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card h3 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.stat-card p {
+  margin: 0;
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--accent);
+}
+
+#records-table-container {
+  max-height: 500px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+}
+
+#records-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+}
+
+#records-table th {
+  position: sticky;
+  top: 0;
+  background: #f8f9fa;
+  z-index: 10;
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--border);
+  font-weight: 600;
+  color: #374151;
+}
+
+#records-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #eef2f6;
+}
+
+#records-table tbody tr:hover {
+  background: #f9f9f9;
+}
+
+#records-body .small {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.btn-small {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+/* Record detail modal specific */
+.record-detail {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.detail-section {
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-section:last-child {
+  border-bottom: none;
+}
+
+.detail-section h4 {
+  margin-top: 0;
+  color: var(--accent);
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.summary-box {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 6px;
+  border-left: 4px solid var(--accent);
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.text-preview {
+  background: #f5f7fa;
+  padding: 12px;
+  border-radius: 6px;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  max-height: 200px;
+  overflow-y: auto;
+  line-height: 1.4;
+}

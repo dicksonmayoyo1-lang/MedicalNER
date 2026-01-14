@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Screening | Document Analyzer</title>
+    <link rel="stylesheet" href="/frontend/base.css">
+    <link rel="stylesheet" href="screening.css">
+    <link rel="stylesheet" href="/frontend/modules/doctor/dashboard.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/frontend/shared/nav-loader.js" defer></script>
+</head>
+
+<body>
+    <!-- Navigation will be loaded here -->
+    <nav class="doctor-nav">
+        <a href="/frontend/modules/doctor/dashboard.html" class="nav-link">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+        <a href="/frontend/modules/doctor/patients/manage.html" class="nav-link">
+            <i class="fas fa-users"></i> Patients
+        </a>
+        <a href="/frontend/modules/doctor/appointments/manage.html" class="nav-link active">
+            <i class="fas fa-calendar-check"></i> Appointments
+        </a>
+        <a href="/frontend/modules/doctor/screening/screening.html" class="nav-link">
+            <i class="fas fa-search-medical"></i> Screening
+        </a>
+        <a href="/frontend/modules/doctor/analytics/analytics.html" class="nav-link">
+            <i class="fas fa-file-medical"></i> Records
+        </a>
+        <div class="nav-spacer"></div>
+        <div class="user-menu">
+            <button class="user-btn" id="user-menu-btn">
+                <i class="fas fa-user-md"></i>
+                <span id="user-name">Loading...</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="user-dropdown hidden" id="user-dropdown">
+                <a href="/frontend/modules/doctor/profile/profile.html"><i class="fas fa-user"></i> Profile</a>
+                <a href="/frontend/modules/doctor/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+
+    <main class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-stethoscope"></i> Medical Risk Screening</h1>
+            <p class="subtitle">Automated risk assessment based on medical entities</p>
+        </div>
+
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            This module analyzes extracted medical entities to identify high-risk conditions, dangerous combinations,
+            and generate risk assessments.
+        </div>
+
+        <!-- Screening Dashboard -->
+        <section class="dashboard-section">
+            <div class="dashboard-cards">
+                <div class="dashboard-card">
+                    <div class="card-icon" style="background-color: #dc3545;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>High Risk Patients</h3>
+                        <div class="card-value" id="high-risk-count">0</div>
+                        <p class="card-desc">Patients requiring immediate attention</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="card-icon" style="background-color: #fd7e14;">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Total Screened</h3>
+                        <div class="card-value" id="total-screened">0</div>
+                        <p class="card-desc">Records analyzed for risk assessment</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="card-icon" style="background-color: #28a745;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Normal Risk</h3>
+                        <div class="card-value" id="normal-risk-count">0</div>
+                        <p class="card-desc">Patients with normal/low risk profiles</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Screening Controls -->
+        <section class="controls-section">
+            <div class="section-header">
+                <h2><i class="fas fa-cogs"></i> Screening Controls</h2>
+            </div>
+
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label for="riskThreshold">Risk Threshold Sensitivity</label>
+                    <div class="slider-container">
+                        <input type="range" id="riskThreshold" min="1" max="100" value="60" class="slider">
+                        <div class="slider-labels">
+                            <span>Low</span>
+                            <span id="threshold-value">60%</span>
+                            <span>High</span>
+                        </div>
+                    </div>
+                    <small class="text-muted">Adjust sensitivity for high-risk classification</small>
+                </div>
+
+                <div class="control-group">
+                    <label for="autoScreen">Automated Screening</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoScreen" checked>
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">Enable real-time screening on upload</span>
+                    </label>
+                </div>
+
+                <button class="btn btn-primary" id="runBatchScreening">
+                    <i class="fas fa-play"></i> Run Batch Screening
+                </button>
+
+                <button class="btn btn-secondary" id="viewScreeningRules">
+                    <i class="fas fa-book"></i> View Screening Rules
+                </button>
+            </div>
+        </section>
+
+        <!-- Screening Results -->
+        <section class="results-section">
+            <div class="section-header">
+                <h2><i class="fas fa-chart-bar"></i> Screening Results</h2>
+                <div class="section-actions">
+                    <button class="btn btn-outline" id="exportResults">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+
+            <div class="filters">
+                <select id="riskFilter" class="filter-select">
+                    <option value="all">All Risk Levels</option>
+                    <option value="critical">Critical Only</option>
+                    <option value="high">High & Critical</option>
+                    <option value="moderate">Moderate & Above</option>
+                    <option value="low">Low & Above</option>
+                </select>
+
+                <select id="dateFilter" class="filter-select">
+                    <option value="all">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                </select>
+            </div>
+
+            <div class="results-container">
+                <div id="screeningResults">
+                    <!-- Results will be loaded here -->
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <h3>No Screening Results</h3>
+                        <p>Run a screening analysis to see results here.</p>
+                        <button class="btn btn-primary" id="startScreening">
+                            <i class="fas fa-play"></i> Start Screening
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rules Modal -->
+        <div id="rulesModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-book-medical"></i> Screening Rules</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="rulesContent">
+                        <!-- Rules will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/frontend/shared/api.js"></script>
+    <script src="/frontend/shared/utils.js"></script>
+    <script src="/frontend/auth/auth.js"></script>
+    <script src="screening.js"></script>
+    <script>
+        // Check auth on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const auth = AuthApp.checkAuth();
+            if (!auth || auth.user.role !== 'doctor') {
+                window.location.href = '/frontend/auth/login.html';
+                return;
+            }
+
+            // Update user name in nav
+            const userNameEl = document.getElementById('user-name');
+            if (userNameEl) {
+                userNameEl.textContent = auth.user.full_name || auth.user.username;
+            }
+
+            // User menu toggle
+            document.getElementById('user-menu-btn')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dropdown = document.getElementById('user-dropdown');
+                if (dropdown) {
+                    dropdown.classList.toggle('hidden');
+                }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                const dropdown = document.getElementById('user-dropdown');
+                const menuBtn = document.getElementById('user-menu-btn');
+                if (dropdown && menuBtn && !menuBtn.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+
+            // Logout
+            document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                AuthApp.logout();
+            });
+        });
+    </script>
+</body>
+
+</html>

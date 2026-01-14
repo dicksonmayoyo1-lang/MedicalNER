@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" class="dashboard-page patient-dashboard">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Appointment - Medical RAG</title>
+    <link rel="stylesheet" href="/frontend/base.css">
+    <link rel="stylesheet" href="/frontend/modules/patient/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="dashboard-page patient-dashboard">
+    <!-- Navigation will be loaded here -->
+    <div id="navigation"></div>
+
+    <!-- Patient-specific navigation -->
+    <nav class="patient-nav">
+        <a href="/frontend/modules/patient/dashboard.html" class="nav-link">
+            <i class="fas fa-home"></i> Overview
+        </a>
+        <a href="/frontend/modules/patient/records/view.html" class="nav-link">
+            <i class="fas fa-file-medical"></i> My Records
+        </a>
+        <a href="/frontend/modules/patient/appointments.html" class="nav-link">
+            <i class="fas fa-calendar-alt"></i> Appointments
+        </a>
+        <a href="/frontend/modules/patient/medications.html" class="nav-link">
+            <i class="fas fa-pills"></i> Medications
+        </a>
+        <div class="nav-spacer"></div>
+        <div class="user-menu">
+            <button class="user-btn" id="user-menu-btn">
+                <i class="fas fa-user"></i>
+                <span id="user-name">Loading...</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="user-dropdown hidden" id="user-dropdown">
+                <a href="/frontend/modules/patient/profile/profile.html"><i class="fas fa-user"></i> Profile</a>
+                <a href="/frontend/modules/patient/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-calendar-plus"></i> Request Appointment</h1>
+            <p>Schedule an appointment with your doctor</p>
+        </div>
+
+        <div class="content-card">
+            <div class="card-header">
+                <h3 class="card-title">Appointment Request Form</h3>
+            </div>
+            <div class="card-body">
+                <form id="appointment-form">
+                    <div class="form-group">
+                        <label for="appointment-type">Appointment Type</label>
+                        <select id="appointment-type" class="form-control" required>
+                            <option value="">Select type...</option>
+                            <option value="consultation">Consultation</option>
+                            <option value="follow-up">Follow-up</option>
+                            <option value="checkup">Routine Checkup</option>
+                            <option value="urgent">Urgent Care</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="preferred-date">Preferred Date</label>
+                        <input type="date" id="preferred-date" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="preferred-time">Preferred Time</label>
+                        <select id="preferred-time" class="form-control" required>
+                            <option value="">Select time...</option>
+                            <option value="09:00">9:00 AM</option>
+                            <option value="10:00">10:00 AM</option>
+                            <option value="11:00">11:00 AM</option>
+                            <option value="14:00">2:00 PM</option>
+                            <option value="15:00">3:00 PM</option>
+                            <option value="16:00">4:00 PM</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reason">Reason for Visit</label>
+                        <textarea id="reason" class="form-control" rows="4" placeholder="Briefly describe the reason for your appointment..." required></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='/frontend/modules/patient/appointments.html'">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Submit Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/frontend/shared/api.js"></script>
+    <script src="/frontend/shared/utils.js"></script>
+    <script src="/frontend/auth/auth.js"></script>
+    <script>
+        // Check auth on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const auth = AuthApp.checkAuth();
+            if (!auth || auth.user.role !== 'patient') {
+                window.location.href = '/frontend/auth/login.html';
+                return;
+            }
+
+            // Update user name in nav
+            document.getElementById('user-name').textContent = auth.user.full_name || auth.user.username;
+
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('preferred-date').setAttribute('min', today);
+
+            // Bind events
+            document.getElementById('appointment-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitAppointmentRequest();
+            });
+
+            document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                AuthApp.logout();
+            });
+
+            // User menu toggle
+            document.getElementById('user-menu-btn')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('user-dropdown').classList.toggle('hidden');
+            });
+        });
+
+        async function submitAppointmentRequest() {
+            const submitBtn = document.getElementById('appointment-form').querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            const formData = {
+                type: document.getElementById('appointment-type').value,
+                preferred_date: document.getElementById('preferred-date').value,
+                preferred_time: document.getElementById('preferred-time').value,
+                reason: document.getElementById('reason').value
+            };
+
+            // Validate form
+            if (!formData.type || !formData.preferred_date || !formData.preferred_time || !formData.reason) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+                
+                const appointment = await window.medicalAPI.post('/appointments', formData);
+                
+                alert('Appointment request submitted successfully! You will be notified once it is confirmed.');
+                window.location.href = '/frontend/modules/patient/appointments.html';
+            } catch (error) {
+                console.error('Error submitting appointment request:', error);
+                const errorMsg = error.message || 'Error submitting request. Please try again.';
+                alert(errorMsg);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        }
+    </script>
+</body>
+
+</html>
+

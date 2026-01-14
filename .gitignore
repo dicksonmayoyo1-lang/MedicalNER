@@ -1,0 +1,11 @@
+key.txt
+diseases_model/
+outputs/
+logs/
+*.pyc
+.env
+.vscode/
+.ipynb_checkpoints/
+data/
+notebooks/
+lab_results/

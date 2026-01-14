@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Medical Document Analyzer - Analytics</title>
+    <link rel="stylesheet" href="/frontend/base.css">
+    <link rel="stylesheet" href="/frontend/modules/doctor/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="analytics.css">
+    <script src="/frontend/assets/chart.umd.js"></script>
+</head>
+
+<body>
+    <!-- Navigation will be loaded here -->
+    <div id="navigation"></div>
+
+    <!-- Doctor-specific navigation -->
+    <nav class="doctor-nav">
+        <a href="/frontend/modules/doctor/dashboard.html" class="nav-link">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+        <a href="/frontend/modules/doctor/patients/manage.html" class="nav-link">
+            <i class="fas fa-users"></i> Patients
+        </a>
+        <a href="/frontend/modules/doctor/appointments/manage.html" class="nav-link active">
+            <i class="fas fa-calendar-check"></i> Appointments
+        </a>
+        <a href="/frontend/modules/doctor/screening/screening.html" class="nav-link">
+            <i class="fas fa-search-medical"></i> Screening
+        </a>
+        <a href="/frontend/modules/doctor/analytics/analytics.html" class="nav-link">
+            <i class="fas fa-file-medical"></i> Records
+        </a>
+        <div class="nav-spacer"></div>
+        <div class="user-menu">
+            <button class="user-btn" id="user-menu-btn">
+                <i class="fas fa-user-md"></i>
+                <span id="user-name">Loading...</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="user-dropdown hidden" id="user-dropdown">
+                <a href="/frontend/modules/doctor/profile/profile.html"><i class="fas fa-user"></i> Profile</a>
+                <a href="/frontend/modules/doctor/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <h1>📈 Analytics Dashboard</h1>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards" id="summary-cards">
+            <div class="summary-card">
+                <h3>Total Records</h3>
+                <p id="total-records">0</p>
+            </div>
+            <div class="summary-card">
+                <h3>Total Diseases</h3>
+                <p id="total-diseases">0</p>
+            </div>
+            <div class="summary-card">
+                <h3>Total Lab Tests</h3>
+                <p id="total-labs">0</p>
+            </div>
+            <div class="summary-card">
+                <h3>Avg. Diseases/Record</h3>
+                <p id="avg-diseases">0</p>
+            </div>
+            <div class="summary-card">
+                <h3>Avg. Labs/Record</h3>
+                <p id="avg-labs">0</p>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="charts-row">
+            <div class="chart-container">
+                <h3>📊 Upload Trend (Last 30 Days)</h3>
+                <canvas id="uploadChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>🩺 Top Diseases</h3>
+                <canvas id="diseasesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="charts-row">
+            <div class="chart-container">
+                <h3>🧪 Top Lab Tests</h3>
+                <canvas id="labsChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>📅 Disease Frequency Trend</h3>
+                <canvas id="diseaseTrendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Outbreak Detection -->
+        <div class="outbreak-section">
+            <div class="section-header">
+                <h2>🚨 Outbreak Detection</h2>
+                <div class="threshold-control">
+                    <label>Spike Threshold: </label>
+                    <input type="range" id="threshold-slider" min="1.5" max="5" step="0.5" value="2">
+                    <span id="threshold-value">2.0x</span>
+                    <button id="analyze-outbreak" class="btn">Analyze</button>
+                </div>
+            </div>
+            <div id="outbreak-results">
+                <p class="loading">Loading outbreak analysis...</p>
+            </div>
+        </div>
+
+        <!-- Date Range -->
+        <div class="date-range">
+            <p id="date-range-info">Date range: Loading...</p>
+        </div>
+    </div>
+
+    <script src="/frontend/shared/api.js"></script>
+    <script src="/frontend/shared/utils.js"></script>
+    <script src="/frontend/auth/auth.js"></script>
+    <script>
+        // Load navigation
+        fetch('/frontend/shared/nav.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('navigation').innerHTML = html;
+                // Mark current page as active
+                const navAnalytics = document.getElementById('nav-analytics');
+                if (navAnalytics) {
+                    navAnalytics.classList.add('active');
+                }
+            });
+
+        // Check auth on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const auth = AuthApp.checkAuth();
+            if (!auth || auth.user.role !== 'doctor') {
+                window.location.href = '/frontend/auth/login.html';
+                return;
+            }
+
+            // Update user name in nav
+            const userNameEl = document.getElementById('user-name');
+            if (userNameEl) {
+                userNameEl.textContent = auth.user.full_name || auth.user.username;
+            }
+
+            // User menu toggle
+            document.getElementById('user-menu-btn')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dropdown = document.getElementById('user-dropdown');
+                if (dropdown) {
+                    dropdown.classList.toggle('hidden');
+                }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                const dropdown = document.getElementById('user-dropdown');
+                const menuBtn = document.getElementById('user-menu-btn');
+                if (dropdown && menuBtn && !menuBtn.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+
+            // Logout
+            document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                AuthApp.logout();
+            });
+        });
+    </script>
+    <script src="analytics.js" defer></script>
+    <script src="/frontend/modules/doctor/dashboard.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" class="dashboard-page patient-dashboard">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Medications - Medical RAG</title>
+    <link rel="stylesheet" href="/frontend/base.css">
+    <link rel="stylesheet" href="/frontend/modules/patient/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="dashboard-page patient-dashboard">
+    <!-- Navigation will be loaded here -->
+    <div id="navigation"></div>
+
+    <!-- Patient-specific navigation -->
+    <nav class="patient-nav">
+        <a href="/frontend/modules/patient/dashboard.html" class="nav-link">
+            <i class="fas fa-home"></i> Overview
+        </a>
+        <a href="/frontend/modules/patient/records/view.html" class="nav-link">
+            <i class="fas fa-file-medical"></i> My Records
+        </a>
+        <a href="/frontend/modules/patient/appointments.html" class="nav-link">
+            <i class="fas fa-calendar-alt"></i> Appointments
+        </a>
+        <a href="/frontend/modules/patient/medications.html" class="nav-link active">
+            <i class="fas fa-pills"></i> Medications
+        </a>
+        <div class="nav-spacer"></div>
+        <div class="user-menu">
+            <button class="user-btn" id="user-menu-btn">
+                <i class="fas fa-user"></i>
+                <span id="user-name">Loading...</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="user-dropdown hidden" id="user-dropdown">
+                <a href="/frontend/modules/patient/profile/profile.html"><i class="fas fa-user"></i> Profile</a>
+                <a href="/frontend/modules/patient/settings.html"><i class="fas fa-cog"></i> Settings</a>
+                <div class="dropdown-divider"></div>
+                <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-pills"></i> My Medications</h1>
+            <p>View your current medications</p>
+        </div>
+
+        <div class="content-card">
+            <div class="card-header">
+                <h3 class="card-title">Current Medications</h3>
+            </div>
+            <div class="card-body">
+                <div id="medications-loading" class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Loading medications...
+                </div>
+                <div id="medications-content" class="hidden">
+                    <div id="medications-list"></div>
+                </div>
+                <div id="medications-empty" class="hidden">
+                    <div class="empty-state">
+                        <i class="fas fa-pills"></i>
+                        <h3>No Medications Recorded</h3>
+                        <p>Your medications will appear here once they are added to your records.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/frontend/shared/api.js"></script>
+    <script src="/frontend/shared/utils.js"></script>
+    <script src="/frontend/auth/auth.js"></script>
+    <script>
+        // Check auth on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const auth = AuthApp.checkAuth();
+            if (!auth || auth.user.role !== 'patient') {
+                window.location.href = '/frontend/auth/login.html';
+                return;
+            }
+
+            // Update user name in nav
+            document.getElementById('user-name').textContent = auth.user.full_name || auth.user.username;
+
+            // Load medications
+            loadMedications();
+
+            // Bind events
+            document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                AuthApp.logout();
+            });
+
+            // User menu toggle
+            document.getElementById('user-menu-btn')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('user-dropdown').classList.toggle('hidden');
+            });
+        });
+
+        async function loadMedications() {
+            try {
+                // Note: Backend doesn't have medications endpoint yet
+                // This is a placeholder
+                document.getElementById('medications-loading').classList.add('hidden');
+                document.getElementById('medications-empty').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error loading medications:', error);
+                document.getElementById('medications-loading').classList.add('hidden');
+                document.getElementById('medications-empty').classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+
+</html>
+
