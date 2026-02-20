@@ -3,6 +3,10 @@
   background: #f5f7fa;
 }
 
+.hidden {
+  display: none;
+}
+
 /* Patient Navigation */
 .patient-nav {
   display: flex;

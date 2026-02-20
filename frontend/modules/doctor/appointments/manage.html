@@ -91,6 +91,9 @@
         <a href="/frontend/modules/doctor/appointments/manage.html" class="nav-link active">
             <i class="fas fa-calendar-check"></i> Appointments
         </a>
+        <a href="/frontend/modules/doctor/medications/manage.html" class="nav-link">
+            <i class="fas fa-pills"></i> Medications
+        </a>
         <a href="/frontend/modules/doctor/screening/screening.html" class="nav-link">
             <i class="fas fa-search-medical"></i> Screening
         </a>
@@ -351,30 +354,75 @@
             return badges[status] || '<span class="badge">Unknown</span>';
         }
 
+        function normalizeDateForInput(dateStr) {
+            if (!dateStr) return '';
+            const s = String(dateStr).trim();
+            // If already YYYY-MM-DD
+            if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+            // If ISO-ish, take the date portion
+            if (s.includes('T')) return s.split('T')[0];
+            // Fallback: try Date parsing
+            const d = new Date(s);
+            if (!isNaN(d.getTime())) return d.toISOString().split('T')[0];
+            return '';
+        }
+
+        function normalizeTimeForSelect(timeStr) {
+            if (!timeStr) return '';
+            const s = String(timeStr).trim();
+            // Strip seconds if present (HH:MM:SS -> HH:MM)
+            const noSeconds = s.replace(/^(\d{1,2}):(\d{2}):\d{2}$/, '$1:$2');
+            // Pad hour if needed (9:00 -> 09:00)
+            const m = noSeconds.match(/^(\d{1,2}):(\d{2})$/);
+            if (m) {
+                const hh = m[1].padStart(2, '0');
+                return `${hh}:${m[2]}`;
+            }
+            return '';
+        }
+
         function openConfirmModal(appointmentId, preferredDate, preferredTime) {
+            console.log('[appointments] openConfirmModal', { appointmentId, preferredDate, preferredTime });
             document.getElementById('confirm-appointment-id').value = appointmentId;
-            document.getElementById('scheduled-date').value = preferredDate || '';
-            document.getElementById('scheduled-time').value = preferredTime || '';
+            document.getElementById('scheduled-date').value = normalizeDateForInput(preferredDate);
+            document.getElementById('scheduled-time').value = normalizeTimeForSelect(preferredTime);
             document.getElementById('doctor-notes').value = '';
             document.getElementById('confirm-modal').classList.remove('hidden');
+            document.getElementById('confirm-modal').setAttribute('aria-hidden', 'false');
         }
 
         function closeConfirmModal() {
             document.getElementById('confirm-modal').classList.add('hidden');
+            document.getElementById('confirm-modal').setAttribute('aria-hidden', 'true');
         }
 
         async function confirmAppointment() {
+            console.log('[appointments] confirmAppointment start');
             const appointmentId = document.getElementById('confirm-appointment-id').value;
             const scheduledDate = document.getElementById('scheduled-date').value;
             const scheduledTime = document.getElementById('scheduled-time').value;
             const doctorNotes = document.getElementById('doctor-notes').value;
 
+            if (!appointmentId) {
+                alert('Invalid appointment ID');
+                console.error('[appointments] Missing appointmentId');
+                return;
+            }
+
             if (!scheduledDate || !scheduledTime) {
                 alert('Please select both date and time');
+                console.warn('[appointments] Missing date/time', { scheduledDate, scheduledTime });
                 return;
             }
 
             try {
+                const submitBtn = document.querySelector('#confirm-form button[type="submit"]');
+                const originalText = submitBtn ? submitBtn.textContent : '';
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming...';
+                }
+
                 await window.medicalAPI.post(`/doctor/appointments/${appointmentId}/confirm`, {
                     scheduled_date: scheduledDate,
                     scheduled_time: scheduledTime,
@@ -386,11 +434,24 @@
                 loadAppointments();
             } catch (error) {
                 console.error('Error confirming appointment:', error);
-                alert('Error confirming appointment. Please try again.');
+                // Surface backend message if available (e.g., HTTP 400/422 from medicalAPI)
+                const errorMessage = error?.message || 'Error confirming appointment. Please try again.';
+                alert(errorMessage);
+            } finally {
+                const submitBtn = document.querySelector('#confirm-form button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Confirm Appointment';
+                }
             }
         }
 
         async function cancelAppointment(appointmentId) {
+            if (!appointmentId) {
+                alert('Invalid appointment ID');
+                return;
+            }
+
             if (!confirm('Are you sure you want to cancel this appointment?')) {
                 return;
             }
@@ -398,7 +459,7 @@
             const reason = prompt('Please provide a reason for cancellation (optional):');
 
             try {
-                await window.medicalAPI.post(`/doctor/appointments/${appointmentId}/cancel`, {
+                const response = await window.medicalAPI.post(`/doctor/appointments/${appointmentId}/cancel`, {
                     reason: reason || null
                 });
 
@@ -406,9 +467,13 @@
                 loadAppointments();
             } catch (error) {
                 console.error('Error cancelling appointment:', error);
-                alert('Error cancelling appointment. Please try again.');
+                const errorMessage = error.message || 'Error cancelling appointment. Please try again.';
+                alert(errorMessage);
             }
         }
+
+        // Make function globally accessible
+        window.cancelAppointment = cancelAppointment;
 
         async function completeAppointment(appointmentId) {
             const notes = prompt('Add completion notes (optional):');
@@ -425,8 +490,14 @@
                 alert('Error completing appointment. Please try again.');
             }
         }
+
+        // Make all functions globally accessible
+        window.openConfirmModal = openConfirmModal;
+        window.closeConfirmModal = closeConfirmModal;
+        window.confirmAppointment = confirmAppointment;
+        window.completeAppointment = completeAppointment;
+        window.filterAppointments = filterAppointments;
     </script>
-      <script src="dashboard.js"></script>
 </body>
 
 </html>

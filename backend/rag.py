@@ -1,5 +1,5 @@
 # rag.py (modified to include import time in responses)
-from http.client import HTTPException
+from fastapi import HTTPException
 import re
 import time
 from datetime import datetime, timedelta

@@ -106,10 +106,46 @@
 
         async function loadMedications() {
             try {
-                // Note: Backend doesn't have medications endpoint yet
-                // This is a placeholder
+                const medications = await window.medicalAPI.get('/medications', { active_only: false });
+
                 document.getElementById('medications-loading').classList.add('hidden');
-                document.getElementById('medications-empty').classList.remove('hidden');
+
+                if (!medications || medications.length === 0) {
+                    document.getElementById('medications-content').classList.add('hidden');
+                    document.getElementById('medications-empty').classList.remove('hidden');
+                    return;
+                }
+
+                document.getElementById('medications-empty').classList.add('hidden');
+                document.getElementById('medications-content').classList.remove('hidden');
+
+                const listEl = document.getElementById('medications-list');
+                listEl.innerHTML = medications.map(med => {
+                    const statusBadge = med.is_active
+                        ? '<span class="badge badge-success">Active</span>'
+                        : '<span class="badge badge-danger">Inactive</span>';
+
+                    const start = med.start_date ? new Date(med.start_date).toLocaleDateString() : '—';
+                    const end = med.end_date ? new Date(med.end_date).toLocaleDateString() : '—';
+                    const notes = med.notes ? `<div style="margin-top: 10px; color:#495057;"><strong>Notes / Recommendations:</strong> ${window.Utils.escapeHtml(med.notes)}</div>` : '';
+                    const prescribedBy = med.prescribed_by ? `<div style="color:#6c757d; font-size: 0.9em;"><strong>Prescribed by:</strong> ${window.Utils.escapeHtml(med.prescribed_by)}</div>` : '';
+
+                    return `
+                        <div class="content-card" style="margin-bottom: 12px;">
+                            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+                                <h3 class="card-title" style="margin:0;"><i class="fas fa-pills"></i> ${window.Utils.escapeHtml(med.name)}</h3>
+                                ${statusBadge}
+                            </div>
+                            <div class="card-body">
+                                <div><strong>Dosage:</strong> ${window.Utils.escapeHtml(med.dosage)}</div>
+                                <div><strong>Frequency:</strong> ${window.Utils.escapeHtml(med.frequency)}</div>
+                                <div><strong>Start:</strong> ${start} &nbsp; <strong>End:</strong> ${end}</div>
+                                ${prescribedBy}
+                                ${notes}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
             } catch (error) {
                 console.error('Error loading medications:', error);
                 document.getElementById('medications-loading').classList.add('hidden');

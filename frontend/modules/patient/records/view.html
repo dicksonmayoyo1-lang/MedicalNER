@@ -142,7 +142,7 @@
     </div>
 
     <!-- Record Detail Modal -->
-    <div id="record-detail-modal" class="modal hidden">
+    <div id="record-detail-modal" class="modal hidden" aria-hidden="true">
         <div class="modal-backdrop" onclick="closeRecordModal()"></div>
         <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
@@ -216,6 +216,13 @@
                         </td>
                     </tr>
                 `).join('');
+
+                // If navigated with a record_id, auto-open that record
+                const params = new URLSearchParams(window.location.search);
+                const recordIdFromUrl = params.get('record_id') || params.get('id');
+                if (recordIdFromUrl) {
+                    viewRecord(recordIdFromUrl);
+                }
             } catch (error) {
                 console.error('Error loading records:', error);
                 document.getElementById('records-loading').innerHTML =
@@ -256,7 +263,10 @@
                     </div>
                 `;
 
-                document.getElementById('record-detail-modal').classList.remove('hidden');
+                const modal = document.getElementById('record-detail-modal');
+                modal.classList.remove('hidden');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
             } catch (error) {
                 console.error('Error loading record:', error);
                 alert('Error loading record details');
@@ -264,8 +274,15 @@
         }
 
         function closeRecordModal() {
-            document.getElementById('record-detail-modal').classList.add('hidden');
+            const modal = document.getElementById('record-detail-modal');
+            modal.classList.add('hidden');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
         }
+
+        // Expose to inline onclick handlers
+        window.viewRecord = viewRecord;
+        window.closeRecordModal = closeRecordModal;
     </script>
 </body>
 

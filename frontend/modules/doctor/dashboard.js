@@ -25,11 +25,26 @@
 
     updateUserInfo() {
       if (this.currentUser) {
-        document.getElementById("user-name").textContent =
-          this.currentUser.full_name || this.currentUser.username;
-        document.getElementById("welcome-title").textContent = `Welcome, Dr. ${
-          this.currentUser.full_name || this.currentUser.username
-        }`;
+        const rawName = this.currentUser.full_name || this.currentUser.username;
+        const safeName = (rawName || "").toString().trim();
+
+        // Avoid duplicated titles like: "Welcome, Dr. Dr. John Smith"
+        // Normalize any leading "Dr", "Dr.", "DR." etc, then add exactly one "Dr."
+        const nameWithoutTitle = safeName.replace(/^dr\.?\s+/i, "").trim();
+
+        // Update navbar name (show name without title to avoid duplication)
+        const userNameEl = document.getElementById("user-name");
+        if (userNameEl) {
+          userNameEl.textContent = nameWithoutTitle || safeName || "Doctor";
+        }
+
+        // Update welcome title (add Dr. prefix)
+        const welcomeTitleEl = document.getElementById("welcome-title");
+        if (welcomeTitleEl) {
+          welcomeTitleEl.textContent = nameWithoutTitle
+            ? `Welcome, Dr. ${nameWithoutTitle}`
+            : "Welcome, Doctor";
+        }
       }
     }
 

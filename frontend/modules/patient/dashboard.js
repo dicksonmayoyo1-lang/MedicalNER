@@ -170,8 +170,10 @@
     }
 
     static viewRecord(recordId) {
-      // Navigate to record detail
-      window.location.href = `/frontend/modules/patient/record-detail.html?id=${recordId}`;
+      // Navigate to records page and auto-open the modal for that record
+      window.location.href = `/frontend/modules/patient/records/view.html?record_id=${encodeURIComponent(
+        recordId
+      )}`;
     }
   }
 

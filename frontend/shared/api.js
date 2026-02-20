@@ -60,6 +60,53 @@ class MedicalAPI {
     return response.json();
   }
 
+  async put(endpoint, data = {}) {
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    if (this.token) {
+      headers["Authorization"] = `Bearer ${this.token}`;
+    }
+
+    const response = await fetch(`${this.baseURL}${endpoint}`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        this.handleAuthError();
+      }
+      throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+    }
+    return response.json();
+  }
+
+  async delete(endpoint) {
+    const headers = {};
+    if (this.token) {
+      headers["Authorization"] = `Bearer ${this.token}`;
+    }
+
+    const response = await fetch(`${this.baseURL}${endpoint}`, {
+      method: "DELETE",
+      headers,
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        this.handleAuthError();
+      }
+      throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+    }
+
+    // 204 No Content is common for deletes
+    if (response.status === 204) return null;
+    return response.json();
+  }
+
   handleAuthError() {
     // Clear invalid token
     this.clearToken();

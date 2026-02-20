@@ -29,7 +29,7 @@ app = FastAPI(
 )
 
 # CORS middleware
-origins = ["*", "http://localhost", "http://127.0.0.1:5500", "http://localhost:5500"]
+origins = ["http://localhost", "http://127.0.0.1:5500", "http://localhost:5500", "*"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -72,6 +72,14 @@ try:
     print("✅ Loaded doctor appointments routes")
 except ImportError as e:
     print(f"⚠️ Warning: Could not import doctor appointments routes: {e}")
+
+# Import doctor medications routes
+try:
+    from routes import doctor_medications
+    app.include_router(doctor_medications.router)
+    print("✅ Loaded doctor medications routes")
+except ImportError as e:
+    print(f"⚠️ Warning: Could not import doctor medications routes: {e}")
 
 # Import existing routes from rag.py (for backward compatibility)
 # These will be refactored later but kept for now
